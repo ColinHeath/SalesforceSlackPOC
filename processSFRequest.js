@@ -1,10 +1,15 @@
-let http = new XMLHttpRequest();
+let xhr = new XMLHttpRequest();
+xhr.open("GET", "https://ipinfo.io/json", true);
+xhr.send();
 
-function responseListener()
+xhr.onreadystatechange = processRequest;
+
+function processRequest(e)
 {
-    alert(this.responseText);
+    if(xhr.readyState == 4 && xhr.status == 200)
+    {
+        let response = JSON.parse(xhr.responseText);
+        alert(response.ip);
+        alert(xhr.responseText);
+    }
 }
-
-http.addEventListener("load", responseListener);
-http.open("GET", "https://test.salesforce.com/services/data");
-http.send();

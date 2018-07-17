@@ -12,4 +12,3 @@ redirectURL += "&client_id=" + paramObject.client_id;
 redirectURL += "&redirect_uri=" + paramObject.redirect_uri;
 
 window.location.replace(redirectURL);
-
