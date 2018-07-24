@@ -28,7 +28,8 @@ if(sfAccessToken == null || sfAccessToken == '')
     }
     else
     {
-        window.location.replace('http://localhost:5656/index.html');
+        //If authentication is broken, this will loop.
+        window.location.replace('https://localhost:8080/index.html');
     }
 }
 
