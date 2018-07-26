@@ -1,9 +1,10 @@
-/*function retrieveHashValues()
+function retrieveHashValues()
 {
     let urlHash = window.location.hash.substr(1);
     let hashParamObject = urlHash.split('&').reduce((result, item) => {
         let keyValuePair = item.split('=');
         result[keyValuePair[0]] = keyValuePair[1];
+        alert(keyValuePair[0] + ": " + keyValuePair[1]);
         return result;
     }, {});
 
@@ -43,7 +44,7 @@ function checkAuthenticationAndRetry(sfAccessToken, sfAuthCount)
             sessionStorage.setItem('sfAuthCount', ++sfAuthCount);
         
             let hashParamObject = retrieveHashValues();
-            
+
             if(hashParamObject['access_token'] != null && hashParamObject['access_token'] != '')
             {
                 sessionStorage.setItem('sfAccessToken', hashParamObject['access_token']);
@@ -77,22 +78,39 @@ if(authResult)
 
     //Execute salesforce requests
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", "https://cs9.lightning.force.com/services/data/v20.0/sobjects/Account/", true);
+    xhr.open("GET", "https://cs9.salesforce.com/services/data/v43.0/");
     xhr.setRequestHeader("Authorization", "Bearer " + sessionStorage.getItem("sfAccessToken"));
     xhr.onreadystatechange = processRequest;
     
-    xhr.send(newAccount);
+    xhr.send();
     
     function processRequest(e)
     {
-        alert("Sent");
+        console.log("Ready State: " + xhr.readyState);
+        if(xhr.readyState === 4)
+        {
+            console.log(xhr.response);
+        }
     }
 }
 else
 {
     //Report auth failure
     document.write("<h4>Authentication Has Failed. Please try again.</h4>");
-}*/
+}
 
-var jsforce = require('jsforce');
-var conn = new jsforce.Connection();
+/*jsforce.browser.init(
+    {
+        clientId: "3MVG9FS3IyroMOh6n9lxAQusceSBzSXmXtR5WRAAlk7clyvBs2cYAmxlFiDwj38Nf2aQMG8Ieft5kH9t.T_RR",
+        redirectUri: "https://0bfa6ae2.ngrok.io"
+    }
+);
+
+jsforce.browser.on('connect', function(conn) {
+    conn.query('SELECT Id, Name FROM Account', function(err, res) {
+      if (err) { return console.error(err); }
+      console.log(res);
+    });
+});
+
+jsforce.browser.login();*/
