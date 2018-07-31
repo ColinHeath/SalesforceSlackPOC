@@ -12,39 +12,57 @@ function loginToSalesforce(sfConnection, methodOnLogin, paramObject)
     });
 }
 
-function createAccount(sfConnection, accountObject)
+function createAccount(sfConnection, parameterObject)
 {
     let newAccount = {
         attributes: { type: 'account' },
-        Name: accountObject["Account Name"]
+        Name: parameterObject["Account Name"]
     };
 
     //Need to query salesforce, make sure no account with this name already exists.
-    sfConnection.query("SELECT Id, Name FROM Account", (err, result) => {
+    sfConnection.query("SELECT Name FROM Account", (err, result) => {
         if(err) { return console.error(err) };
+
+        let allowCreation = true;
 
         for(let i = 0; i < result.records.length; i++)
         {
             if((result.records[i])["Name"] === newAccount["Name"])
             {
-                console.log("entered false return");
-                return;
+                allowCreation = false;
+                break;
             }
         }
 
-        sfConnection.create("Account", newAccount);
+        if(allowCreation) sfConnection.create("Account", newAccount);
     });
 }
 
-function printAllLeads(sfConnection, parameterObject)
+function createLead(sfConnection, parameterObject)
 {
-    sfConnection.query("SELECT Name, Company, Status FROM Lead", (err, result) => {
+    let newLead = {
+        attributes: {
+            type: 'Lead'
+        },
+        LastName: parameterObject["Last Name"],
+        Company: parameterObject["Company"],
+        LeadSource: parameterObject["Lead Source"],
+        Status: parameterObject["Lead Status"]
+    }
+
+    sfConnection.query("SELECT LastName FROM Lead", (err, result) => {
         if(err) { return console.error(err) };
 
         for(let i = 0; i < result.records.length; i++)
         {
-            console.log(result.records[i]);
+            if((result.records[i])["LastName"] === newLead["LastName"])
+            {
+                console.log("Lead Would have been duplicate");
+                return;
+            }
         }
+
+        sfConnection.create("Lead", newLead);
     });
 }
 
@@ -75,17 +93,26 @@ function initializeServer()
                     
                     let inputData = body["input_data"];
 
-                    console.log(inputData);
-                    /*let accountData = JSON.parse(body["input_data"]["accountData"]);
-                    accountData = accountData[0];
-    
-                    loginToSalesforce(conn, createAccount, accountData);*/
+                    if(inputData.hasOwnProperty("accountData"))
+                    {
+                        console.log("Getting Ready to Make Account");
+                        let accountData = JSON.parse(inputData["accountData"]);
+                        accountData = accountData[0];
+
+                        loginToSalesforce(conn, createAccount, accountData);
+                    }
+                    else if(inputData.hasOwnProperty("leadData"))
+                    {
+                        console.log("Getting Ready to Make Lead")
+                        let leadData = JSON.parse(inputData["leadData"]);
+                        leadData = leadData[0];
+
+                        loginToSalesforce(conn, createLead, leadData);
+                    }
                 })    
             }
             else
-            { 
-                loginToSalesforce(conn, printAllLeads, null);
-            }
+            {  }
     
             res.end();
         }
