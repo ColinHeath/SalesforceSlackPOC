@@ -38,13 +38,33 @@ function createAccount(sfConnection, parameterObject)
     });
 }
 
+function switchSalesforceAction(sfConnection, inputData)
+{
+    if(inputData.hasOwnProperty("accountData"))
+    {
+        console.log("Getting Ready to Make Account");
+        let accountData = JSON.parse(inputData["accountData"]);
+        accountData = accountData[0];
+
+        loginToSalesforce(sfConnection, createAccount, accountData);
+    }
+    else if(inputData.hasOwnProperty("leadData"))
+    {
+        console.log("Getting Ready to Make Lead")
+        let leadData = JSON.parse(inputData["leadData"]);
+        leadData = leadData[0];
+
+        loginToSalesforce(sfConnection, createLead, leadData);
+    }
+}
+
 function createLead(sfConnection, parameterObject)
 {
     let newLead = {
         attributes: {
             type: 'Lead'
         },
-        LastName: parameterObject["Last Name"],
+        LastName: parameterObject["Lead Name"],
         Company: parameterObject["Company"],
         LeadSource: parameterObject["Lead Source"],
         Status: parameterObject["Lead Status"]
@@ -55,6 +75,7 @@ function createLead(sfConnection, parameterObject)
 
         for(let i = 0; i < result.records.length; i++)
         {
+            //TODO: Fix this filter
             if((result.records[i])["LastName"] === newLead["LastName"])
             {
                 console.log("Lead Would have been duplicate");
@@ -93,26 +114,11 @@ function initializeServer()
                     
                     let inputData = body["input_data"];
 
-                    if(inputData.hasOwnProperty("accountData"))
-                    {
-                        console.log("Getting Ready to Make Account");
-                        let accountData = JSON.parse(inputData["accountData"]);
-                        accountData = accountData[0];
+                    console.log(inputData);
 
-                        loginToSalesforce(conn, createAccount, accountData);
-                    }
-                    else if(inputData.hasOwnProperty("leadData"))
-                    {
-                        console.log("Getting Ready to Make Lead")
-                        let leadData = JSON.parse(inputData["leadData"]);
-                        leadData = leadData[0];
-
-                        loginToSalesforce(conn, createLead, leadData);
-                    }
+                    switchSalesforceAction(conn, inputData);
                 })    
             }
-            else
-            {  }
     
             res.end();
         }
